@@ -1,3 +1,13 @@
+# Run locally
+
+```powershell
+docker compose up --build
+```
+
+Open http://localhost:8080. The frontend sends `/api/*` requests through Nginx to the backend, and the backend connects to the PostgreSQL `db` service. Database migrations run automatically when the backend starts.
+
+For Vite development, run `npm run dev` in `backend` and `frontend` in separate terminals; the Vite proxy forwards `/api` to `http://localhost:4000`.
+
 # Security tests (your next step)
 
 Write tests here that attack the API and prove it holds:

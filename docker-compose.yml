@@ -1,7 +1,6 @@
-# Runs everything: docker compose up --build
-# First time only, create tables and an admin:
-#   docker compose exec backend node dist/db/migrate.js
-# (the seed script needs dev tooling; run `npm run seed:admin` locally against the same DB)
+# Runs the frontend at http://localhost:8080, API at /api, and PostgreSQL.
+# The backend applies idempotent migrations during startup.
+# To create the configured development admin: cd backend; npm run seed:admin
 services:
   db:
     image: postgres:16-alpine
@@ -11,6 +10,11 @@ services:
       POSTGRES_DB: sentinel
     ports: ["5432:5432"]
     volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d sentinel"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
 
   backend:
     build: ./backend
@@ -20,7 +24,9 @@ services:
       CLIENT_ORIGIN: http://localhost:8080
       NODE_ENV: production
       TRUST_PROXY: "1"
-    depends_on: [db]
+    depends_on:
+      db:
+        condition: service_healthy
 
   frontend:
     build: ./frontend

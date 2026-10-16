@@ -1,0 +1,31 @@
+# Runs everything: docker compose up --build
+# First time only, create tables and an admin:
+#   docker compose exec backend node dist/db/migrate.js
+# (the seed script needs dev tooling; run `npm run seed:admin` locally against the same DB)
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: sentinel
+    ports: ["5432:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+
+  backend:
+    build: ./backend
+    env_file: ./backend/.env
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@db:5432/sentinel
+      CLIENT_ORIGIN: http://localhost:8080
+      NODE_ENV: production
+      TRUST_PROXY: "1"
+    depends_on: [db]
+
+  frontend:
+    build: ./frontend
+    ports: ["8080:80"]
+    depends_on: [backend]
+
+volumes:
+  pgdata:

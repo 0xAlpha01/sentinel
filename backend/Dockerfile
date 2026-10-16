@@ -15,4 +15,4 @@ COPY --from=build /app/dist ./dist
 COPY src/db/migrations ./dist/db/migrations
 USER node
 EXPOSE 4000
-CMD ["sh", "-c", "node dist/db/migrate.js && node dist/server.js"]
+CMD ["npm", "start"]

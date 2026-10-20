@@ -1,6 +1,16 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
 
-const baseURL = import.meta.env.VITE_API_URL ?? '/api';
+/**
+ * The Express application mounts every public route below `/api`.
+ *
+ * In development, a relative `/api` is proxied by Vite. In production the
+ * Vercel variable may be either the Render origin or its `/api` path; normalize
+ * both forms so request callers never have to repeat the prefix.
+ */
+const configuredApiUrl = import.meta.env.VITE_API_URL?.trim() || '/api';
+const baseURL = configuredApiUrl.replace(/\/+$/, '').endsWith('/api')
+  ? configuredApiUrl.replace(/\/+$/, '')
+  : `${configuredApiUrl.replace(/\/+$/, '')}/api`;
 
 export const api = axios.create({ baseURL, withCredentials: true });
 
